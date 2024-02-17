@@ -14,7 +14,8 @@ function App() {
     "react에 관한 글",
     "감자탕에 관한 글",
   ]);
-  let [likes, increaseLikes] = useState([0, 0, 0]);
+
+  let [modal, setModal] = useState(-1); // UI의 상태
 
   // id 는 변수랑 똑같이 자료 저장
   // b 는 state 변경을 도와주는 함수 이름
@@ -24,6 +25,13 @@ function App() {
 
   // state 값 변경은 함수로 해주어야함 그냥 변경해주면 재랜더링이 일어남
   // increaseLikes(변경될 값) [0,0,0] 을 [1,0,0] 으로 변경하려면 increaseLike([1,0,0])
+
+  /*
+  map 함수
+  [1,2,3].map(function()=>{console.log(1)}) : 1을 array의 크기만큼 반복 출력
+  [1,2,3].map(function(a)=>{console.log(a)}) : 1,2,3을 순차적으로 출력
+  [1,2,3].map(function() => {return 9}) : [9,9,9] 를 리턴해줌
+  */
 
   return (
     <div className="App">
@@ -56,47 +64,88 @@ function App() {
           정렬 버튼
         </button>
       </div>
-      <div className="list">
-        <h4>
-          {titles[0]}
-          <span
-            onClick={() => {
-              increaseLikes([likes[0] + 1, likes[1], likes[2]]);
-            }}
-          >
-            🙄
-          </span>
-          {likes[0]}
-        </h4>
-        <p>2월 15일 {id} 발행</p>
-      </div>
-      <div className="list">
-        <h4>
-          {titles[1]} <span>🙄</span> {likes[1]}
-        </h4>
-        <p>2월 15일 {id} 발행</p>
-      </div>
-      <div className="list">
-        <h4>
-          {titles[2]} <span>🙄</span> {likes[2]}
-        </h4>
-        <p>2월 15일 {id} 발행</p>
-      </div>
-      <Modal></Modal>
+
+      {titles.map((title, num) => {
+        //반복문 두번째 파라미터 num은 index임
+        return (
+          <div className="list">
+            <h4
+              onClick={() => {
+                setModal(modal * -1);
+              }}
+            >
+              {num + 1}. {title}
+            </h4>
+            <Like />
+            <p>2월 15일 {id} 발행</p>
+          </div>
+        ); //list도 리액트에서는 알아서 잘 표현해줌
+      })}
+
+      {
+        //삼항연산자 : 조건식 ? 참 : 거짓  html안에 if문을 사용할 수 없어서 조건문은 삼항연산자로 구현
+        modal == 1 ? <Modal color="yellow" titles={titles} func={c} /> : null //자식에서 사용할 state를 이런식으로 명시해줌
+      }
     </div>
   );
 }
 
-// 컴포넌트 만들기 == 함수 만들기
-// 대문자로 시작하는게 관습
-// return() 안에 html을 담는다 <div></div> 하나
-function Modal() {
+/*
+컴포넌트 만들기 == 함수 만들기
+대문자로 시작하는게 관습
+return() 안에 html을 담는다 <div></div> 하나
+만약 두개이상을 쓰고 싶다? 그르면 <div></div>로 묶거나 <></>와 같은 의미없는 거로 묶어도뎀
+컴포넌트 사용할때 <Modal></Modal> 로 사용하기도 하고 <Modal/> 하나만 써도 같은 효과
+
+컴포넌트 사용하기 좋은 상황
+1. 반복적인 html을 축약
+2. 페이지 전환 할때 큰 페이지를 컴포넌트로
+3. 자주 변경되는 html ui 들을 컴포넌트로
+*/
+/*
+동적인 UI 만들기
+1. html css 로 일단 디자인 부터 하셈
+2. UI의 상태를 state로 저장
+3. 상태에 따라 UI가 보여지는 모습을 작성
+*/
+//props 로 함수 밖의 변수를 가져올 수 있음.
+//우리가 만든 페이지의 구조는 <App></App> 안에 <Modal/>이 있다. Modal 밖의 변수를 Modal 안에서 사용하는게 props
+// <App>에서는 props로 Modal로 변수를 전달 할 수 있음(부모에서 자식으로 전송) 자식에서 부모로는 불가능
+function Modal(props) {
   return (
-    <div className="modal">
-      <h4>제목</h4>
+    <div className="modal" style={{ background: props.color }}>
+      <h4>{props.titles}</h4>
       <p>날짜</p>
       <p>상세내용</p>
+      <button
+        onClick={() => {
+          let copy = [...props.titles]; // ...은 깊은복사 state 변경함수는 기존state와 파라미터를 비교해서 다르면 수행됨
+          // 근데 얕은 복사를 하면 주소값이 똑같기 때문에 그냥 아무일도 안일어나게 됨.
+          copy[0] = "롤에 관한글";
+          copy[1] = "메랜에 관한 글";
+          copy[2] = "감자탕에 관한글";
+          props.func(copy);
+        }}
+      >
+        글수정
+      </button>
     </div>
+  );
+}
+
+function Like() {
+  let [like, increaseLike] = useState(0);
+  return (
+    <span>
+      <span
+        onClick={() => {
+          increaseLike(like + 1);
+        }}
+      >
+        🙄
+      </span>
+      {like}
+    </span>
   );
 }
 
