@@ -14,8 +14,9 @@ function App() {
     "react에 관한 글",
     "감자탕에 관한 글",
   ]);
-
+  let [current, setCurrent] = useState(-1);
   let [modal, setModal] = useState(-1); // UI의 상태
+  let [input, setInput] = useState("");
 
   // id 는 변수랑 똑같이 자료 저장
   // b 는 state 변경을 도와주는 함수 이름
@@ -64,27 +65,49 @@ function App() {
           정렬 버튼
         </button>
       </div>
+      <div>
+        {titles &&
+          titles.map((title, num) => {
+            //map 함수 : 반복문 두번째 파라미터 num은 index임
+            return (
+              <div className="list">
+                <h4
+                  onClick={() => {
+                    if (modal == -1) {
+                      setModal(modal * -1);
+                    }
+                    setCurrent(num);
+                  }}
+                >
+                  {num + 1}. {title}
+                  <Like />
+                </h4>
 
-      {titles.map((title, num) => {
-        //반복문 두번째 파라미터 num은 index임
-        return (
-          <div className="list">
-            <h4
-              onClick={() => {
-                setModal(modal * -1);
-              }}
-            >
-              {num + 1}. {title}
-            </h4>
-            <Like />
-            <p>2월 15일 {id} 발행</p>
-          </div>
-        ); //list도 리액트에서는 알아서 잘 표현해줌
-      })}
+                <p>2월 15일 {id} 발행</p>
+              </div>
+            ); //list도 리액트에서는 알아서 잘 표현해줌
+          })}
+      </div>
+      <input
+        onChange={(e) => {
+          setInput(e.target.value); // 오래걸리는 함수임
+        }}
+      ></input>
+      <button
+        onClick={() => {
+          let copy = [...titles];
+          copy.push(input);
+          c(copy);
+        }}
+      >
+        글 추가
+      </button>
 
       {
         //삼항연산자 : 조건식 ? 참 : 거짓  html안에 if문을 사용할 수 없어서 조건문은 삼항연산자로 구현
-        modal == 1 ? <Modal color="yellow" titles={titles} func={c} /> : null //자식에서 사용할 state를 이런식으로 명시해줌
+        modal == 1 ? (
+          <Modal color="yellow" titles={titles} func={c} num={current} />
+        ) : null //자식에서 사용할 state를 이런식으로 명시해줌
       }
     </div>
   );
@@ -114,20 +137,18 @@ return() 안에 html을 담는다 <div></div> 하나
 function Modal(props) {
   return (
     <div className="modal" style={{ background: props.color }}>
-      <h4>{props.titles}</h4>
+      <h4>{props.titles[props.num]}</h4>
       <p>날짜</p>
       <p>상세내용</p>
+      <button>글수정</button>
       <button
         onClick={() => {
-          let copy = [...props.titles]; // ...은 깊은복사 state 변경함수는 기존state와 파라미터를 비교해서 다르면 수행됨
-          // 근데 얕은 복사를 하면 주소값이 똑같기 때문에 그냥 아무일도 안일어나게 됨.
-          copy[0] = "롤에 관한글";
-          copy[1] = "메랜에 관한 글";
-          copy[2] = "감자탕에 관한글";
+          let copy = props.titles;
+          copy.splice(props.num, 1);
           props.func(copy);
         }}
       >
-        글수정
+        글 삭제
       </button>
     </div>
   );
@@ -138,7 +159,8 @@ function Like() {
   return (
     <span>
       <span
-        onClick={() => {
+        onClick={(e) => {
+          e.stopPropagation(); // 이거는 이제 상위 html로 이벤트 버블링이 일어나는 것을 막아주는 함수
           increaseLike(like + 1);
         }}
       >
