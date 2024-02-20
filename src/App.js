@@ -84,6 +84,15 @@ function App() {
                 </h4>
 
                 <p>2월 15일 {id} 발행</p>
+                <button
+                  onClick={() => {
+                    let copy = [...titles];
+                    copy.splice(num, 1);
+                    c(copy);
+                  }}
+                >
+                  글 삭제
+                </button>
               </div>
             ); //list도 리액트에서는 알아서 잘 표현해줌
           })}
@@ -141,15 +150,6 @@ function Modal(props) {
       <p>날짜</p>
       <p>상세내용</p>
       <button>글수정</button>
-      <button
-        onClick={() => {
-          let copy = props.titles;
-          copy.splice(props.num, 1);
-          props.func(copy);
-        }}
-      >
-        글 삭제
-      </button>
     </div>
   );
 }
